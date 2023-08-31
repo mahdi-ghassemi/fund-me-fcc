@@ -35,13 +35,11 @@ Forked FundMe Smart Contract from  - CoinIran Academy Project
 
 ## Thanks to
 
-- :bulb: Standard NFT (ERC721)
-- :zap: Standard Bid & Buy
-- :lock: Mint Pausable 
-- :moneybag: Royalty Calculate
-- :fire: Auction (Coming soon)
-- :euro: Platform Fee Calculate
-
+- :boom: <a href="https://twitter.com/sbetamc?s=20" target="_blank">Dr. Shayan Eskandari</a>
+- :boom: <a href="https://twitter.com/samsaqz" target="_blank">Dr. Zeynab Alipanahloo</a>
+- :boom: <a href="https://twitter.com/fatemeheidari" target="_blank">Dr. Fatemeh Heidari</a>
+- :boom: <a href="https://twitter.com/Aysha8665" target="_blank">Mrs. Aysha Amin</a>
+- :boom: <a href="https://twitter.com/Sahar_banoo_" target="_blank">Mrs. Sahar Rahbari</a>
 
 ## License
 
