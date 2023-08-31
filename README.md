@@ -2,8 +2,8 @@
 <p align="center">
   <a href="https://soliditylang.org/"><img src="https://img.shields.io/badge/Solidity-%5E0.8.0-green" alt="Solidity"></a> 
   &emsp;    
-  <a href="https://web3js.readthedocs.io/en/v1.7.3/" target="_blank"> 
-   <img alt="Web3.js" src="https://img.shields.io/badge/-Web3.js-F16822?logo=Web3.js&logoColor=white&style=plastic">
+  <a href="https://docs.ethers.org/v5/" target="_blank"> 
+   <img alt="Ethers.js" src="https://img.shields.io/badge/-Ethers.js-F16822?logo=Ethers.js&logoColor=white&style=plastic">
   </a>     
   &emsp; 
   <a href="https://www.w3.org/html/" target="_blank"> 
