@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FundMe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous" />
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12 mt-2">
+          <div class="card border-primary mb-3">
+            <div class="card-header">FundMe Smart Contract</div>
+            <div class="card-body">
+              <table class="table table-striped table-bordered table-responsive">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Input</th>
+                    <th scope="col">Action</th>
+                    <th scope="col">Result</th>
+                  </tr>
+                </thead class="table-dark">
+                <tbody>
+                  <tr>
+                    <th scope="row">1</th>
+                    <td>Connecting to your wallet</td>
+                    <td>N/A</td>
+                    <td><button id="btn_connect_wallet" type="button" class="btn btn-primary">Connect to Wallet</button></td>
+                    <td><span id="address"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">2</th>
+                    <td>Getting ETH current price from Chainlink oracle</td>
+                    <td>N/A</td>
+                    <td><button id="btn_price" type="button" class="btn btn-primary">Get Price</button></td>
+                    <td><span id="price"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">3</th>
+                    <td>Getting smart contract balance based on ETH</td>
+                    <td>N/A</td>
+                    <td><button id="btn_sc_balance" type="button" class="btn btn-primary">Get Balance</button></td>
+                    <td><span id="sc_balance"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">4</th>
+                    <td>Getting total fund based on ETH</td>
+                    <td>N/A</td>
+                    <td><button id="btn_total_fund" type="button" class="btn btn-primary">Total Fund</button></td>
+                    <td><span id="total_fund"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">5</th>
+                    <td>Getting the funder balance on Smart Contract</td>
+                    <td>N/A</td>
+                    <td><button id="btn_funder_balance" type="button" class="btn btn-primary">Get Balance</button></td>
+                    <td><span id="funder_balance"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">6</th>
+                    <td>Getting the list of funders</td>
+                    <td>N/A</td>
+                    <td><button id="btn_funders_list" type="button" class="btn btn-primary">Get Funders</button></td>
+                    <td><span id="funder_list"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">7</th>
+                    <td>Sending fund to smart contract based on ETH</td>
+                    <td><input type="text" class="form-control" id="fund" placeholder="Amount (ETH)"></td>
+                    <td><button id="btn_fund" type="button" class="btn btn-success">Sending Fund</button></td>
+                    <td><span id="fund_result"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">8</th>
+                    <td>Request for refund. Refunds can be made only 60 seconds after fund.</td>
+                    <td>N/A</td>
+                    <td><button id="btn_refund" type="button" class="btn btn-danger">Refund</button></td>
+                    <td><span id="refund_result"></span></td>
+                  </tr>
+                  <tr>
+                    <th scope="row">9</th>
+                    <td>Request for withdraw.</td>
+                    <td>N/A</td>
+                    <td><button id="btn_withdraw" type="button" class="btn btn-danger">Withdraw</button></td>
+                    <td><span id="withdraw_result"></span></td>
+                  </tr>                  
+                </tbody>
+              </table>
+            </div>
+            <div class="card-footer text-center">
+              <p>Developed by Mahdi Ghasemi - 2023</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="funders_modal" class="modal fade">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Funders List</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div id="modal_body" class="modal-body">
+           
+          </div>          
+        </div>
+        </div>
+    </div>  
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
+
+    <script type="module">
+      import { ethers } from "./ethers-5.6.esm.min.js";
+      import { abi, contractAddress } from "./constants.js";
+
+      const connectButton = document.getElementById("btn_connect_wallet");
+      const withdrawButton = document.getElementById("btn_withdraw");
+      const fundButton = document.getElementById("btn_fund");
+      const refundButton = document.getElementById("btn_refund");
+      const balanceButton = document.getElementById("btn_sc_balance");
+      const priceButton = document.getElementById("btn_price");
+      const totalFundButton = document.getElementById("btn_total_fund");
+      const funderBalanceButton = document.getElementById("btn_funder_balance");
+      const fundersListButton = document.getElementById("btn_funders_list");
+
+      const connectResult = document.getElementById("address");
+      const priceResult = document.getElementById("price");
+      const balanceResult = document.getElementById("sc_balance");
+      const fundResult = document.getElementById("fund_result");
+      const refundResult = document.getElementById("refund_result");
+      const totalFundResult = document.getElementById("total_fund");
+      const funderBalanceResult = document.getElementById("funder_balance");
+      const fundersListResult = document.getElementById("funder_list");
+
+
+      connectButton.onclick = connect;
+      withdrawButton.onclick = withdraw;
+      fundButton.onclick = fund;
+      refundButton.onclick = refund;
+      balanceButton.onclick = getBalance;
+      priceButton.onclick = getPrice;
+      totalFundButton.onclick = getTotalFund;
+      funderBalanceButton.onclick = getFunderBalance;
+      fundersListButton.onclick = getFundersList;
+
+      async function connect() {
+        if (typeof window.ethereum !== "undefined") {
+          try {
+            const provider = new ethers.providers.Web3Provider(window.ethereum);
+            await ethereum.request({ method: "eth_requestAccounts" });
+            connectButton.innerHTML = "Connected";
+            const accounts = await ethereum.request({ method: "eth_accounts" })
+            const signer = provider.getSigner();
+            const address = await signer.getAddress();
+            connectResult.innerHTML = address;   
+          } catch (error) {
+            connectResult.innerHTML = error;
+          }       
+        } else {
+          connectResult.innerHTML = "Please install MetaMask"
+        }
+      }
+
+      async function getPrice() {
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          const contract = new ethers.Contract(contractAddress, abi, signer)
+          try {           
+            const price = await contract.getCurrentRate();
+            priceResult.innerHTML = "$" + price;
+          } catch (error) {
+            priceResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function getTotalFund() {
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          const contract = new ethers.Contract(contractAddress, abi, signer)
+          try {           
+            const funds = await contract.getTotalFunds();
+            totalFundResult.innerHTML = ethers.utils.formatEther(funds) + " ETH";
+          } catch (error) {
+            totalFundResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function getFunderBalance() {
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          const contract = new ethers.Contract(contractAddress, abi, signer)
+          try {           
+            const balance = await contract.balanceOf();
+            funderBalanceResult.innerHTML = ethers.utils.formatEther(balance) + " ETH";
+          } catch (error) {
+            funderBalanceResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function getFundersList() {
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
+          const contract = new ethers.Contract(contractAddress, abi, signer)
+          try {           
+            const fundersList = await contract.getFundersList();
+            if(fundersList.length > 0) {
+              show(fundersList);
+            } else {
+              fundersListResult.innerHTML = "Not found.";
+            }
+            
+          } catch (error) {
+            fundersListResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function getBalance() {
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          try {
+            const balance = await provider.getBalance(contractAddress);
+            balanceResult.innerHTML = ethers.utils.formatEther(balance) + " ETH";
+          } catch (error) {
+            balanceResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function fund() {
+        const ethAmount = document.getElementById("fund").value        
+        fundButton.disabled = true;        
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const contract = new ethers.Contract(contractAddress, abi, signer);
+          try {
+            const transactionResponse = await contract.fund({
+              value: ethers.utils.parseEther(ethAmount),
+            });
+            await listenForTransactionMine(transactionResponse, provider, fundResult, fundButton);
+          } catch (error) {
+            fundResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function refund() {               
+        refundButton.disabled = true;        
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          const signer = provider.getSigner();
+          const contract = new ethers.Contract(contractAddress, abi, signer);
+          try {
+            const transactionResponse = await contract.refund();
+            await listenForTransactionMine(transactionResponse, provider, refundResult, refundButton);
+          } catch (error) {
+            fundResult.innerHTML = error;
+          }
+        } else {
+          connectResult.innerHTML = "Please install MetaMask";
+        }
+      }
+
+      async function withdraw() {
+        console.log(`Withdrawing...`)
+        if (typeof window.ethereum !== "undefined") {
+          const provider = new ethers.providers.Web3Provider(window.ethereum)
+          await provider.send('eth_requestAccounts', [])
+          const signer = provider.getSigner()
+          const contract = new ethers.Contract(contractAddress, abi, signer)
+          try {
+            const transactionResponse = await contract.withdraw()
+            await listenForTransactionMine(transactionResponse, provider)
+            // await transactionResponse.wait(1)
+          } catch (error) {
+            console.log(error)
+          }
+        } else {
+          withdrawButton.innerHTML = "Please install MetaMask"
+        }
+      } 
+
+      function listenForTransactionMine(transactionResponse, provider, result, btn) {
+          result.innerHTML = "Waiting to Mining...";
+          return new Promise((resolve, reject) => {
+              try {
+                  provider.once(transactionResponse.hash, (transactionReceipt) => {
+                      result.innerHTML = `Completed with ${transactionReceipt.confirmations} confirmations. `;
+                      btn.disabled = false;
+                      resolve();
+                  })
+              } catch (error) {
+                  result.innerHTML = error;
+                  btn.disabled = false;
+                  reject(error)
+              }
+          })
+      }
+
+      function show(fundersList) {         
+         var html = '<table class="table table-striped table-bordered table-responsive"><thead><tr><th scope="col">#</th><th scope="col">Address</th><th scope="col">Fund Value</th><th scope="col">Date & Time</th><th scope="col">Withdrawn</th></tr></thead class="table-dark"><tbody>';      
+         for (let i = 0; i < fundersList.length; i++) {            
+            html += '<tr><th scope="row">'+ (i + 1) +'</th>';
+            html += '<td><span>' + fundersList[i][0] + '</span></td>';
+            html += '<td><span>' + ethers.utils.formatEther(fundersList[i][1]) + ' ETH</span></td>';
+            html += '<td><span>' + new Date(fundersList[i][2] * 1000).toLocaleDateString("en-US") + ' ' + new Date(fundersList[i][2] * 1000).toLocaleTimeString("en-US") + '</span></td>';
+            html += '<td><span>' + fundersList[i][3] + '</span></td></tr>';
+         }
+         html += '</tbody></table>';        
+         const modalBody = document.getElementById("modal_body");
+         modalBody.innerHTML = "";
+         modalBody.innerHTML = html;
+         var myModal = new bootstrap.Modal(document.getElementById('funders_modal'), {});
+         myModal.show();
+      }
+    
+    </script>
+
+  </body>
+</html>
